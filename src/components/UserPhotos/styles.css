@@ -1,0 +1,19 @@
+.photo-container {
+  padding: 20px;
+}
+.photo-block {
+  border-bottom: 1px solid #ccc;
+  padding: 10px 0;
+}
+.photo {
+  max-width: 100%;
+  height: auto;
+}
+.comments-section {
+  margin-top: 10px;
+  background-color: #f5f5f5;
+  padding: 10px;
+}
+.comment-block {
+  margin-bottom: 5px;
+}

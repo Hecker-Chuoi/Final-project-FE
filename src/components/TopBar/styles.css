@@ -1,0 +1,10 @@
+.topbar-toolbar {
+  display: flex;
+  justify-content: space-between;
+}
+.left-name {
+  font-weight: bold;
+}
+.right-title {
+  font-style: italic;
+}
