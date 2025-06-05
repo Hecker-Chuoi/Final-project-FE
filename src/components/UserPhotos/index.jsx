@@ -11,6 +11,8 @@ function UserPhotos({currentUser}) {
   const [photos, setPhotos] = useState(null);
   const [newComments, setNewComments] = useState({});
   const [error, setError] = useState("");
+  const [newPhotosFromStorage, setNewPhotosFromStorage] = useState([]);
+  const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(null);
   // const photos = models.photoOfUserModel(userId);
   // console.log("Photos data:", photos);
 
@@ -25,7 +27,12 @@ function UserPhotos({currentUser}) {
       }
     };
     fetchData();
+    const storedPhotos = localStorage.getItem(`newPhotos-${userId}`);
+    if (storedPhotos) {
+      setNewPhotosFromStorage(JSON.parse(storedPhotos));
+      }
   }, [userId]);
+
 
   const handleAddComment = async (photoId) => {
     const comment = newComments[photoId]?.trim();
@@ -68,13 +75,69 @@ function UserPhotos({currentUser}) {
     }
   };
 
-  // Kiểm tra nếu photos là null hoặc undefined
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const newPhoto = {
+        _id: `local-${Date.now()}`,
+        file_name: file.name,
+        data_url: reader.result,
+        date_time: new Date().toISOString(),
+        comments: [],
+      };
+
+      const updatedPhotos = [...newPhotosFromStorage, newPhoto];
+      localStorage.setItem(
+        `newPhotos-${userId}`,
+        JSON.stringify(updatedPhotos)
+      );
+
+      setNewPhotosFromStorage(updatedPhotos);
+    };
+    reader.readAsDataURL(file);
+
+    e.target.value = null;
+  };
+
+  const isCurrentUser = currentUser && currentUser._id === userId;
+
+  if (!photos && newPhotosFromStorage.length === 0) {
+    return <p>Loading photos...</p>;
+  }
+
   if (!photos || photos.length === 0) {
     return <p>No photos to display.</p>;
   }
 
   return (
     <div className="photo-container">
+      {isCurrentUser && (
+        <div style={{ marginBottom: "1rem" }}>
+          <label htmlFor="file-upload" style={{ cursor: "pointer", color: "blue", textDecoration: "underline" }}>
+            Add Photo
+          </label>
+          <input
+            type="file"
+            id="file-upload"
+            accept="image/*"
+            style={{ display: "none" }}
+            onChange={handleFileChange}
+          />
+        </div>
+      )}
+
+      {/* Hiển thị ảnh mới từ localStorage trước */}
+      {newPhotosFromStorage.map((photo) => (
+        <div key={photo._id} className="photo-block" style={{ border: "1px solid green", marginBottom: "1rem" }}>
+          <img src={photo.data_url} alt={photo.file_name} className="photo" />
+          <p>Uploaded at {format(new Date(photo.date_time), "PPpp")} (local)</p>
+          <p><i>This photo is saved locally only.</i></p>
+        </div>
+      ))}
+
       {photos.map((photo) => (
         <div>
         <div key={photo._id} className="photo-block">

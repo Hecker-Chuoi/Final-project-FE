@@ -1,6 +1,6 @@
 import React from "react";
 import { AppBar, Toolbar, Typography } from "@mui/material";
-import { useParams, useLocation } from "react-router-dom";
+import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@mui/material";
 import { Link } from "react-router-dom";
 import {useEffect, useState} from "react";
@@ -9,8 +9,9 @@ import fetchModel from "../../lib/fetchModelData";
 import "./styles.css";
 
 function TopBar({currentUser, setCurrentUser}) {
-const location = useLocation();
+  const location = useLocation();
   const [user, setUser] = useState(null);
+  const navigate = useNavigate();
 
   const match = location.pathname.match(/^\/(users|photos)\/([^/]+)/);
   const userId = match ? match[2] : null;
@@ -91,7 +92,16 @@ const location = useLocation();
 
               <Button
                 variant="outlined"
-                onClick={() => setCurrentUser(null)}
+                onClick={() => {
+                  // Xoá ảnh lưu local của user hiện tại
+                  if (currentUser && currentUser._id) {
+                    localStorage.removeItem(`newPhotos-${currentUser._id}`);
+                  }
+
+                  // Xoá currentUser (đăng xuất)
+                  setCurrentUser(null);
+                  navigate("/log-in");
+                }}
                 color="inherit"
               >
                 Log out
